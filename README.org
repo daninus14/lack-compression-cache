@@ -1,0 +1,64 @@
+
+* Files That Will Not Be Compressed
+The following file formats are usually compressed already, so they will not be compressed.
+
+Image formats:
+    JPEG   
+    PNG  
+    GIF  
+    WebP
+
+Audio formats:
+    MP3   
+    AAC
+    FLAC
+    OGG
+
+Video formats:
+    MP4
+    AVI
+    MOV
+    WebM
+
+Archive formats:
+    ZIP   
+    RAR  
+    TAR
+    7z
+
+PDF Files are sometimes compressed. There is a way to check the file if it's compressed by opening it.
+
+** From a LLM for checking if PDFs are compressed:
+
+#+BEGIN_SRC
+import PyPDF2
+
+def is_pdf_compressed(pdf_path):
+    """Checks if a PDF file is compressed using PyPDF2.
+
+    Args:
+        pdf_path (str): The path to the PDF file.
+
+    Returns:
+        bool: True if the PDF is compressed, False otherwise.
+    """
+
+    with open(pdf_path, 'rb') as pdf_file:
+        reader = PyPDF2.PdfReader(pdf_file)
+        for page in reader.pages:
+            if page.mediabox.width != page.cropbox.width or page.mediabox.height != page.cropbox.height:
+                return True  # Indicates potential compression
+            for obj in page.resources.get('/XObject', {}):
+                stream = page.resources.get('/XObject')[obj]
+                if stream.get('/Filter') == '/FlateDecode':
+                    return True  # Explicitly checks for FlateDecode filter
+    return False
+
+# Example usage:
+pdf_path = "your_pdf_file.pdf"
+if is_pdf_compressed(pdf_path):
+    print("The PDF file is compressed.")
+else:
+    print("The PDF file is not compressed.")
+    #+END_SRC
+    
