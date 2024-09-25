@@ -2,3 +2,7 @@
  (:class qlot/source/dist:source-dist
   :initargs (:distribution "https://beta.quicklisp.org/dist/quicklisp.txt" :%version :latest)
   :version "2023-10-21"))
+("compression-cache" .
+ (:class qlot/source/github:source-github
+  :initargs (:repos "daninus14/compression-cache" :ref nil :branch nil :tag nil)
+  :version "github-c22a61c259911f432d1c613dd05aad66065a1b96"))
