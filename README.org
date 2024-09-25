@@ -32,6 +32,8 @@ See the `example.lisp`
 (clack:stop *clack-handler*)
 #+END_SRC
 
+Please note that you should have some files in the =static= directory mentioned above, preferrably large css or javascript files. Then confirm in your network tab in the browser that the file size loaded is much smaller than whatever appears in the filesystem locally. You can check also that inside the =bin/cache= directory a new compressed version of that file was saved.
+
 The middleware should be able to be added like any other lack middleware.
 
 * Files That Will Not Be Compressed
