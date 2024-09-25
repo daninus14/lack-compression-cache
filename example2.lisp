@@ -8,9 +8,9 @@
 
 (defvar *compressed-app*
   (lack:builder
-   (:compression-cache :cache-path "bin/cache" :static-files-path "static/")
-   (:static :path "/public/"
-            :root #P"/static-files/")   
+   (:compression-cache :cache-path "bin/cache" :static-files-path "/static/")
+   (:static :path "/assets/"
+            :root #P"static/")   
    *app*))
 
 (defvar *clack-handler*

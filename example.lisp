@@ -7,7 +7,7 @@
 
 (defvar *compressed-app*
   (funcall lack/middleware/compression.cache:*lack-middleware-compression-cache*
-           *app* :cache-path "bin/cache" :static-files-path "static/"))
+           *app* :cache-path "bin/cache" :static-files-path "/static/"))
 
 (defvar *clack-handler*
   (clack:clackup *compressed-app*))
