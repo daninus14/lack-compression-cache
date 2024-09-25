@@ -3,7 +3,9 @@
   :author "Daniel Nussenbaum"
   :license "MIT"
   :depends-on ("lack-app-file"
+               "compression-cache"
                "lack-component"
+               "local-time"
                "alexandria")
   :components ((:file "lack-compression-cache")))
 
