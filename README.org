@@ -6,6 +6,16 @@ To provide a lack middleware for compressing and caching static resources like c
 As of today 2024/09/25 this is not in quicklisp. You can just download the source code from here and load it with quicklisp or asdf after you set the directory where you save it to be in the registry.
 
 * Usage
+
+** Usage Notes
+
+- Please note that you should have some files in the =static= directory mentioned in the examples below, preferrably large css or javascript files.
+- Then confirm in your network tab in the browser that the file size loaded is much smaller than whatever appears in the filesystem locally.
+- You can check also that inside the =bin/cache= directory a new compressed version of that file was saved.
+- The middleware should be able to be added like any other lack middleware.
+
+
+** Simple Example 
 See the `example.lisp`
 
 #+BEGIN_SRC common-lisp
@@ -32,9 +42,30 @@ See the `example.lisp`
 (clack:stop *clack-handler*)
 #+END_SRC
 
-Please note that you should have some files in the =static= directory mentioned above, preferrably large css or javascript files. Then confirm in your network tab in the browser that the file size loaded is much smaller than whatever appears in the filesystem locally. You can check also that inside the =bin/cache= directory a new compressed version of that file was saved.
+** Example with Lack Builder Sytnax
 
-The middleware should be able to be added like any other lack middleware.
+#+BEGIN_SRC common-lisp
+(ql:quickload "clack")
+(ql:quickload "lack")
+
+(defvar *app*
+  (lambda (env)
+    (declare (ignorable env))
+    '(200 (:content-type "text/plain") ("Hello, Compression2!"))))
+
+(defvar *compressed-app*
+  (lack:builder
+   (:compression-cache :cache-path "bin/cache" :static-files-path "static/")
+   (:static :path "/public/"
+            :root #P"/static-files/")   
+   *app*))
+
+(defvar *clack-handler*
+  (clack:clackup *compressed-app*))
+
+;; To Stop the App
+(clack:stop *clack-handler*)
+#+END_SRC
 
 * Files That Will Not Be Compressed
 The following file formats are usually compressed already, so they will not be compressed.

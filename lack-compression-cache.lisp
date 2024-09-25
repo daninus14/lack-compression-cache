@@ -1,5 +1,5 @@
-(defpackage lack/middleware/compression-cache
-  (:nicknames :lack.middleware.compression-cache)
+(defpackage lack/middleware/compression.cache
+  (:nicknames :lack.middleware.compression.cache)
   (:use :cl)
   (:import-from :local-time)
   (:import-from :lack.component
@@ -11,9 +11,36 @@
                 :if-let)
   (:export :*lack-middleware-compression-cache*
    :call-app-file))
-(in-package :lack/middleware/compression-cache)
+(in-package :lack/middleware/compression.cache)
 
 (defvar *cache-initialized* NIL)
+
+(defun remove-leading-slash (string)
+  (if (and (stringp string) (char= #\/ (aref string 0)))
+      (subseq string 1)
+      string))
+
+(defun apply-middleware (app static-files-path)
+  (etypecase static-files-path
+    (null app)
+    (string
+     (lambda (env)
+       (format T "running my middleware")
+       (let ((path-info (getf env :path-info)))
+         (if (starts-with-subseq static-files-path (remove-leading-slash path-info))
+             (progn
+               (setf (getf env :path-info) (remove-leading-slash path-info))
+               (ensure-optimal-filepath app env))
+             (funcall app env)))))
+    ;; (function
+    ;;  (lambda (env)
+    ;;   (let ((path-info (getf env :path-info)))
+    ;;     (if-let (new-path (funcall static-files-path path-info))
+    ;;       (progn
+    ;;         (setf (getf env :path-info) new-path)
+    ;;         (call-app-file root env))
+    ;;       (funcall app env)))))
+    ))
 
 (defparameter *lack-middleware-compression-cache*
   (lambda (app &key cache-path static-files-path)
@@ -58,9 +85,6 @@ will be cached for future requests."
          (accept-encoding (when headers (gethash "accept-encoding" headers)))
          (accepts-gzip (when accept-encoding (search "gzip" accept-encoding)))
          (path-info (getf env :path-info)))
-    (log:info accepts-gzip)
-    (log:info (needs-compression path-info))
-    (log:info path-info)
     (if (and accepts-gzip (needs-compression path-info))
         ;; here provide the file copression alternative
         ;; and set the encoding header
@@ -84,32 +108,4 @@ will be cached for future requests."
                  path-info)))
         (funcall app env))))
 
-(defun remove-leading-slash (string)
-  (if (and (stringp string) (char= #\/ (aref string 0)))
-      (subseq string 1)
-      string))
 
-(defun apply-middleware (app static-files-path)
-  (etypecase static-files-path
-    (null app)
-    (string
-     (lambda (env)
-       (format T "running my middleware")
-       (let ((path-info (getf env :path-info)))
-         (log:info (starts-with-subseq static-files-path (remove-leading-slash path-info)))
-         (log:info static-files-path)
-         (log:info path-info)
-         (if (starts-with-subseq static-files-path (remove-leading-slash path-info))
-             (progn
-               (setf (getf env :path-info) (remove-leading-slash path-info))
-               (ensure-optimal-filepath app env))
-             (funcall app env)))))
-    ;; (function
-    ;;  (lambda (env)
-    ;;   (let ((path-info (getf env :path-info)))
-    ;;     (if-let (new-path (funcall static-files-path path-info))
-    ;;       (progn
-    ;;         (setf (getf env :path-info) new-path)
-    ;;         (call-app-file root env))
-    ;;       (funcall app env)))))
-    ))
