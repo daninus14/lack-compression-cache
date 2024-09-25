@@ -20,17 +20,16 @@
       (subseq string 1)
       string))
 
-(defun apply-middleware (app static-files-path)
+(defun apply-middleware (app static-files-path &optional (root #P"./"))
   (etypecase static-files-path
     (null app)
     (string
      (lambda (env)
        (format T "running my middleware")
        (let ((path-info (getf env :path-info)))
-         (if (starts-with-subseq static-files-path (remove-leading-slash path-info))
-             (progn
-               (setf (getf env :path-info) (remove-leading-slash path-info))
-               (ensure-optimal-filepath app env))
+         (if (and (uiop:file-exists-p (remove-leading-slash path-info))
+                  (starts-with-subseq static-files-path path-info))
+             (ensure-optimal-filepath app env root)
              (funcall app env)))))
     ;; (function
     ;;  (lambda (env)
@@ -43,11 +42,11 @@
     ))
 
 (defparameter *lack-middleware-compression-cache*
-  (lambda (app &key cache-path static-files-path)
-    (if *cache-initialized* (apply-middleware app static-files-path)
+  (lambda (app &key cache-path static-files-path (root #P"./"))
+    (if *cache-initialized* (apply-middleware app static-files-path root)
         (progn
           (compression-cache:initialize-cache cache-path)
-          (apply-middleware app static-files-path))))
+          (apply-middleware app static-files-path root))))
   "Middleware for serving compressed cached files")
 
 (defvar *already-compressed-file-extensions*
@@ -71,7 +70,7 @@
                          filename)
         (return NIL)))))
 
-(defun ensure-optimal-filepath (app env)
+(defun ensure-optimal-filepath (app env &optional (root #P"./"))
   "This will call the app function on the environment which has an optimal :path-info.
 First we will check if the request has a \"Accept-Encoding: gzip\" header.
 If it doesn't, it will maintain the environment as it is.
@@ -91,21 +90,14 @@ will be cached for future requests."
         ;; and set the cache header
         ;; there should be an option for the length of the cache header
         (progn
-          ;; (setf (getf env :path-info)
-          ;;       (compression-cache:ensure-path-to-compressed-file
-          ;;        path-info))
-          ;; (setf (gethash "content-encoding" headers) "gzip")
-          ;; (setf (gethash "cache-control" headers) "max-age=31536000, immutable")
-          ;; (setf (gethash "expires" headers)
-          ;;       (local-time:to-rfc1123-timestring
-          ;;        (local-time:timestamp+ (local-time:now) 1 :year)))
           (list 200
                 (list :content-encoding "gzip"
                       :cache-control "max-age=31536000, immutable"
                       :expires (local-time:to-rfc1123-timestring
                                 (local-time:timestamp+ (local-time:now) 1 :year)))
                 (compression-cache:ensure-path-to-compressed-file
-                 path-info)))
-        (funcall app env))))
+                 (remove-leading-slash path-info))))
+        (call-app-file root env))))
 
-
+(defun call-app-file (root env)
+  (lack.component:call (make-instance 'lack.app.file:lack-app-file :root root) env))
