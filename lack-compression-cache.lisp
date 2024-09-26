@@ -88,14 +88,13 @@ will be cached for future requests."
         ;; and set the encoding header
         ;; and set the cache header
         ;; there should be an option for the length of the cache header
-        (progn
-          (list 200
-                (list :content-encoding "gzip"
-                      :cache-control "max-age=31536000, immutable"
-                      :expires (local-time:to-rfc1123-timestring
-                                (local-time:timestamp+ (local-time:now) 1 :year)))
-                (compression-cache:ensure-path-to-compressed-file
-                 (remove-leading-slash path-info))))
+        (list 200
+              (list :content-encoding "gzip"
+                    :cache-control "max-age=31536000, immutable"
+                    :expires (local-time:to-rfc1123-timestring
+                              (local-time:timestamp+ (local-time:now) 1 :year)))
+              (compression-cache:ensure-path-to-compressed-file
+               (remove-leading-slash path-info)))
         (call-app-file root env))))
 
 (defun call-app-file (root env)
