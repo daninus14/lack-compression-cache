@@ -45,7 +45,7 @@
   (lambda (app &key cache-path static-files-path (root #P"./") (no-http-cache NIL))
     (if *cache-initialized* (apply-middleware app static-files-path root no-http-cache)
         (progn
-          (compression-cache:initialize-cache (uiop:merge-pathnames* cache-path root))
+          (compression-cache:initialize-cache (uiop:merge-pathnames* cache-path root) root)
           (apply-middleware app static-files-path root no-http-cache))))
   "Middleware for serving compressed cached files")
 
