@@ -26,7 +26,8 @@
     (string
      (lambda (env)
        (let ((path-info (getf env :path-info)))
-         (if (and (uiop:file-exists-p (remove-leading-slash path-info))
+         (if (and (uiop:file-exists-p
+                   (uiop:merge-pathnames* (remove-leading-slash path-info) root))
                   (starts-with-subseq static-files-path path-info))
              (ensure-optimal-filepath app env root no-http-cache)
              (funcall app env)))))
