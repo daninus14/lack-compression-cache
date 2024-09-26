@@ -20,7 +20,7 @@
       (subseq string 1)
       string))
 
-(defun apply-middleware (app static-files-path &optional (root #P"./"))
+(defun apply-middleware (app static-files-path &optional (root #P"./") no-http-cache)
   (etypecase static-files-path
     (null app)
     (string
@@ -28,7 +28,7 @@
        (let ((path-info (getf env :path-info)))
          (if (and (uiop:file-exists-p (remove-leading-slash path-info))
                   (starts-with-subseq static-files-path path-info))
-             (ensure-optimal-filepath app env root)
+             (ensure-optimal-filepath app env root no-http-cache)
              (funcall app env)))))
     ;; (function
     ;;  (lambda (env)
@@ -41,11 +41,11 @@
     ))
 
 (defparameter *lack-middleware-compression-cache*
-  (lambda (app &key cache-path static-files-path (root #P"./"))
-    (if *cache-initialized* (apply-middleware app static-files-path root)
+  (lambda (app &key cache-path static-files-path (root #P"./") (no-http-cache NIL))
+    (if *cache-initialized* (apply-middleware app static-files-path root no-http-cache)
         (progn
           (compression-cache:initialize-cache cache-path)
-          (apply-middleware app static-files-path root))))
+          (apply-middleware app static-files-path root no-http-cache))))
   "Middleware for serving compressed cached files")
 
 (defvar *already-compressed-file-extensions*
@@ -69,7 +69,7 @@
                          filename)
         (return NIL)))))
 
-(defun ensure-optimal-filepath (app env &optional (root #P"./"))
+(defun ensure-optimal-filepath (app env &optional (root #P"./") no-http-cache)
   "This will call the app function on the environment which has an optimal :path-info.
 First we will check if the request has a \"Accept-Encoding: gzip\" header.
 If it doesn't, it will maintain the environment as it is.
@@ -89,10 +89,12 @@ will be cached for future requests."
         ;; and set the cache header
         ;; there should be an option for the length of the cache header
         (list 200
-              (list :content-encoding "gzip"
-                    :cache-control "max-age=31536000, immutable"
-                    :expires (local-time:to-rfc1123-timestring
-                              (local-time:timestamp+ (local-time:now) 1 :year)))
+              (append
+               (list :content-encoding "gzip")
+               (when (null no-http-cache)
+                 (list :cache-control "max-age=31536000, immutable"
+                       :expires (local-time:to-rfc1123-timestring
+                                 (local-time:timestamp+ (local-time:now) 1 :year)))))
               (compression-cache:ensure-path-to-compressed-file
                (remove-leading-slash path-info)))
         (call-app-file root env))))
