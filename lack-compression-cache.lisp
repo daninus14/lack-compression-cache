@@ -25,7 +25,6 @@
     (null app)
     (string
      (lambda (env)
-       (format T "running my middleware")
        (let ((path-info (getf env :path-info)))
          (if (and (uiop:file-exists-p (remove-leading-slash path-info))
                   (starts-with-subseq static-files-path path-info))
