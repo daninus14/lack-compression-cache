@@ -5,6 +5,10 @@ To provide a lack middleware for compressing and caching static resources like c
 
 As of today 2024/09/25 this is not in quicklisp. You can just download the source code from here and load it with quicklisp or asdf after you set the directory where you save it to be in the registry.
 
+** Dependencies
+
+This project depends on https://github.com/daninus14/compression-cache also not in quicklisp. You can download the code straight from the source.
+
 * Usage
 
 ** Usage Notes
