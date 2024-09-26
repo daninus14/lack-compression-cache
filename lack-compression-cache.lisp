@@ -83,7 +83,8 @@ will be cached for future requests."
   (let* ((headers (getf env :headers))
          (accept-encoding (when headers (gethash "accept-encoding" headers)))
          (accepts-gzip (when accept-encoding (search "gzip" accept-encoding)))
-         (path-info (getf env :path-info)))
+         (path-info (getf env :path-info))
+         (static-file (uiop:merge-pathnames* (remove-leading-slash path-info) root)))
     (if (and accepts-gzip (needs-compression path-info))
         ;; here provide the file copression alternative
         ;; and set the encoding header
@@ -97,7 +98,7 @@ will be cached for future requests."
                        :expires (local-time:to-rfc1123-timestring
                                  (local-time:timestamp+ (local-time:now) 1 :year)))))
               (compression-cache:ensure-path-to-compressed-file
-               (remove-leading-slash path-info)))
+               static-file))
         (call-app-file root env))))
 
 (defun call-app-file (root env)
