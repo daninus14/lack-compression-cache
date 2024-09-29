@@ -46,11 +46,6 @@ See the `example.lisp`
 #+BEGIN_SRC common-lisp
 (ql:quickload "clack")
 
-(defun remove-leading-slash (string)
-  (if (and (stringp string) (char= #\/ (aref string 0)))
-      (subseq string 1)
-      string))
-
 (defvar *app*
   (lambda (env)
     (declare (ignorable env))
