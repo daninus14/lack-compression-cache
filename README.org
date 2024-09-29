@@ -13,7 +13,7 @@ This project depends on https://github.com/daninus14/compression-cache also not 
 
 ** Usage Notes
 
-- We are currently using *gzip* compression. The code is made extensible, so adding a different type of compression should be as trivial, however, the change must be made in compression-cache and lack-compression-cache. 
+- We are currently using *gzip* compression. The code is made extensible, so adding a different type of compression should be trivial, however, the change must be made in compression-cache and lack-compression-cache. 
 - The middleware should be able to be added like any other lack middleware.
   - See https://github.com/fukamachi/lack for an explanation
 - There are some precompressed files that will not be compressed. See below for a full list.
