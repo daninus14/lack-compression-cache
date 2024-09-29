@@ -120,7 +120,7 @@ PDF Files are sometimes compressed. There is a way to check the file if it's com
 
 We could implement this in common lisp in the future for figuring out if a PDF should be compressed.
 
-#+BEGIN_SRC
+#+BEGIN_SRC python
 import PyPDF2
 
 def is_pdf_compressed(pdf_path):
