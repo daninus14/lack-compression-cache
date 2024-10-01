@@ -114,7 +114,7 @@ Archive formats:
     TAR
     7z
 
-PDF Files are sometimes compressed. There is a way to check the file if it's compressed by opening it.
+PDF Files are sometimes compressed. There is a way to check if the file is compressed by opening it.
 
 ** From a LLM for checking if PDFs are compressed:
 
